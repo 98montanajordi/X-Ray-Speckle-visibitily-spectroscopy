@@ -1,0 +1,38 @@
+import numpy as np
+import time
+from matplotlib import pyplot as plt
+
+side = 100
+image = np.zeros([side,side])
+speckleSize = 5
+xPhasors = int(np.round(side/speckleSize))
+yPhasors = int(np.round(side/speckleSize))
+phasor = np.zeros([side,side],dtype = complex)
+
+noiseSize = 2
+
+def poissonNoise(noiseSize):
+    poisson = np.random.poisson(size=[side,side]) 
+    poisson = poisson/np.max(poisson)
+    return poisson
+
+for i in range(xPhasors):
+    for j in range(yPhasors):
+        phase = np.random.random()*2*np.pi*1j
+        phasor[i,j] = np.exp(phase)
+
+        
+speckle = np.fft.fft2(phasor)
+speckle = [np.abs(elt)**2 for elt in speckle]
+speckle /= np.max(speckle)
+
+poisson = poissonNoise(noiseSize)
+speckle += poisson
+
+#Add 2 uncorrelated patterns together to get 0.5 contrast
+#Simulate charge cloud: we need better resolution than the detector size
+# do for example 1000x1000 and then finally get 200x200 when I digitize.
+# Speckle size should also be bigger than the 5x5 detector size.
+
+plt.figure()
+plt.imshow(speckle)
